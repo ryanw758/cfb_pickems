@@ -1,0 +1,113 @@
+.game-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-field-line);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.game-card.is-correct {
+  border-color: #2f7d4d;
+}
+
+.game-card.is-incorrect {
+  border-color: #7d3a2f;
+  opacity: 0.75;
+}
+
+.game-card.is-locked {
+  border-color: var(--color-field-line);
+  opacity: 0.8;
+}
+
+.game-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-chalk-dim);
+  margin-bottom: 12px;
+}
+
+.game-card__meta-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-card__lock {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-chalk);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.game-card__spread {
+  color: var(--color-amber);
+}
+
+.game-card__matchup {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.game-card__at {
+  font-family: var(--font-mono);
+  color: var(--color-chalk-dim);
+  font-size: 13px;
+}
+
+.game-card__team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1.5px solid var(--color-field-line);
+  border-radius: var(--radius);
+  color: var(--color-chalk);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.game-card__team:hover:not(:disabled) {
+  border-color: var(--team-accent);
+}
+
+.game-card__team.is-picked {
+  border-color: var(--team-accent);
+  background: color-mix(in srgb, var(--team-accent) 14%, transparent);
+}
+
+.game-card__team:disabled {
+  cursor: default;
+}
+
+.game-card__logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.game-card__team-name {
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.03em;
+}
+
+.game-card__result {
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-chalk-dim);
+}

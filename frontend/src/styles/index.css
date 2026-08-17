@@ -1,0 +1,73 @@
+/* ---------------------------------------------------------------------
+   Design tokens
+   Subject: Saturday college football. Night-game scoreboard energy --
+   dark field, chalk sideline lines, amber scoreboard-bulb accent.
+   ------------------------------------------------------------------ */
+:root {
+  --color-field: #0e1912;       /* dark turf green, page background */
+  --color-field-line: #24382c;  /* hash-mark green, card borders */
+  --color-chalk: #f3f1e7;       /* sideline chalk white, primary text */
+  --color-chalk-dim: #9fada2;   /* secondary text */
+  --color-amber: #ffb02e;       /* scoreboard bulb, primary accent */
+  --color-amber-dim: #7a5a1e;
+  --color-home: #ff6b4a;        /* home pick accent (end-zone orange) */
+  --color-away: #4ac3ff;        /* away pick accent (visitor blue) */
+  --color-card: #142219;
+
+  --font-display: 'Anton', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+
+  --radius: 6px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-field);
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent,
+    transparent 79px,
+    var(--color-field-line) 79px,
+    var(--color-field-line) 80px
+  );
+  color: var(--color-chalk);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 2px;
+}
+
+.app-shell {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 20px 64px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
