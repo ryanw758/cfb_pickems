@@ -37,11 +37,3 @@ for deploy instructions. It provisions:
 
 A Vite + React app with three screens: Login, Picks (this week's 10 games),
 and Leaderboard. See [`frontend/README.md`](frontend/README.md).
-
-## Next steps
-
-1. Share your spreadsheet — I'll match the scoring/point-spread rules exactly.
-2. Decide on scoring: straight-up wins, or confidence points (rank picks 1-10)?
-3. Decide tiebreaker rules for the leaderboard.
-4. Deploy the backend, point the frontend's `VITE_API_BASE_URL` at it, deploy
-   the frontend (e.g., S3 + CloudFront, or Amplify Hosting).
