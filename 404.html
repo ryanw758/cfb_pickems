@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+    <script type="text/javascript">
+        var pathSegments = window.location.pathname.split('/').filter(Boolean);
+        var repoName = pathSegments[0];
+        sessionStorage.redirect = '/' + pathSegments.join('/');
+        window.location.href = '/' + repoName + '/';
+    </script>
+</head>
+<body></body>
+</html>
