@@ -1,0 +1,21 @@
+{
+  "name": "CFB Pick'em",
+  "short_name": "Pick'em",
+  "start_url": "/cfb_pickems/",
+  "scope": "/cfb_pickems/",
+  "display": "standalone",
+  "background_color": "#4a3626",
+  "theme_color": "#4a3626",
+  "icons": [
+    {
+      "src": "/cfb_pickems/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/cfb_pickems/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
