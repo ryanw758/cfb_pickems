@@ -130,6 +130,19 @@ Resources:
             Path: /signup
             Method: POST
 
+  GetFBSTeamsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src
+      Handler: handlers/getFBSTeams.handler
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PickemApi
+            Path: /teams
+            Method: GET
+
   GetCurrentWeekGamesFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -138,6 +151,8 @@ Resources:
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref GamesTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref PicksTable
       Events:
         CurrentApi:
           Type: HttpApi
@@ -208,8 +223,9 @@ Resources:
   # Scheduled jobs
   ##########################################################################
 
-  # Every Monday 8am UTC: pull this week's slate from ESPN, pick 10 games
-  # with the closest spreads, and store them.
+  # Tuesday 9pm EST (Wednesday 2am UTC): pull this week's slate from ESPN, pick 10 games
+  # with the closest spreads, and store them. Tuesday night allows Monday night games
+  # to complete before the slate is finalized.
   FetchWeeklyGamesFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -222,33 +238,37 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref GamesTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref UsersTable
       Events:
         WeeklySchedule:
           Type: Schedule
           Properties:
-            Schedule: cron(0 8 ? * MON *)
+            Schedule: cron(0 2 ? * WED *)
             Name: cfb-pickem-fetch-weekly-games
-            Description: Pulls this week's 10 closest-spread CFB games from ESPN
+            Description: Pulls this week's 10 closest-spread CFB games from ESPN (Tuesday 9pm EST)
 
-  # Every Sunday 11pm UTC: pull final scores and grade the week's picks.
-  GradeWeekFunction:
+  LiveGameRefreshFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src
-      Handler: handlers/gradeWeek.handler
+      Handler: handlers/refreshLiveGames.handler
       Timeout: 30
+      Environment:
+        Variables:
+          ESPN_GROUP_ID: !Ref EspnGroupId
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref GamesTable
         - DynamoDBCrudPolicy:
             TableName: !Ref PicksTable
       Events:
-        WeeklySchedule:
+        MinuteSchedule:
           Type: Schedule
           Properties:
-            Schedule: cron(0 23 ? * SUN *)
-            Name: cfb-pickem-grade-week
-            Description: Grades the week's picks against final ESPN scores
+            Schedule: rate(1 minute)
+            Name: cfb-pickem-refresh-live-games
+            Description: Refreshes scores and game status from ESPN every minute
 
 Outputs:
   ApiUrl:

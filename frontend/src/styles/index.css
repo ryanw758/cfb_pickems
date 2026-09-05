@@ -4,21 +4,27 @@
    dark field, chalk sideline lines, amber scoreboard-bulb accent.
    ------------------------------------------------------------------ */
 :root {
-  --color-field: #0e1912;       /* dark turf green, page background */
-  --color-field-line: #24382c;  /* hash-mark green, card borders */
-  --color-chalk: #f3f1e7;       /* sideline chalk white, primary text */
-  --color-chalk-dim: #9fada2;   /* secondary text */
-  --color-amber: #ffb02e;       /* scoreboard bulb, primary accent */
-  --color-amber-dim: #7a5a1e;
-  --color-home: #ff6b4a;        /* home pick accent (end-zone orange) */
-  --color-away: #4ac3ff;        /* away pick accent (visitor blue) */
-  --color-card: #142219;
+  --color-field: #a58e60;
+  --color-field-line: #d9cfb6;
+  --color-outline-neutral: #8c7f66;
+  --color-chalk: #3a342a;
+  --color-chalk-dim: #7c7261;
+  --color-amber: #c9a227;
+  --color-amber-dim: #8f7526;
+  --color-home: #c06a5c;
+  --color-away: #5b90ac;
+  --color-card: #e8e0cd;
+  --color-parchment: #e8e0cd;
+  --color-page-line: rgba(58, 52, 42, 0.08);
+  --surface-header: #4a3626;
+  --surface-header-border: #3d2c1f;
 
-  --font-display: 'Anton', sans-serif;
+  --font-display: 'Barlow Condensed', sans-serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'Space Mono', monospace;
+  --font-score: 'Space Mono', monospace;
 
-  --radius: 6px;
+  --radius: 7px;
 }
 
 * {
@@ -33,16 +39,17 @@ body,
 
 body {
   margin: 0;
-  background: var(--color-field);
-  background-image: repeating-linear-gradient(
-    180deg,
-    transparent,
-    transparent 79px,
-    var(--color-field-line) 79px,
-    var(--color-field-line) 80px
-  );
+  background-color: var(--color-field);
+  background-image:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-field) 88%, white) 0%, transparent 55%),
+    url('../assets/CFB_Background.png');
+  background-size: auto, 480px;
+  background-repeat: repeat, repeat;
+  background-attachment: fixed;
   color: var(--color-chalk);
   font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -60,9 +67,15 @@ button {
 }
 
 .app-shell {
-  max-width: 880px;
+  max-width: 1580px;
   margin: 0 auto;
   padding: 0 20px 64px;
+}
+
+@media (max-width: 700px) {
+  .app-shell {
+    padding-inline: 12px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

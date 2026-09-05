@@ -22,14 +22,27 @@ export const api = {
   login: (name, password) =>
     request('/login', { method: 'POST', body: JSON.stringify({ name, password }) }),
 
-  signup: (name, password) =>
-    request('/signup', { method: 'POST', body: JSON.stringify({ name, password }) }),
+  signup: (name, password, favoriteTeam, favoriteTeamId) =>
+    request('/signup', { method: 'POST', body: JSON.stringify({ name, password, favoriteTeam, favoriteTeamId }) }),
+
+  fetchFBSTeams: async () => {
+    const CACHE_KEY = 'fbs_teams_cache_v3';
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed[0]?.conference) return parsed;
+    }
+    const conferences = await request('/teams');
+    const valid = Array.isArray(conferences) ? conferences : [];
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(valid));
+    return valid;
+  },
 
   getCurrentWeekGames: () => request('/games/current'),
   getGamesByWeek: (weekId) => request(`/games/${encodeURIComponent(weekId)}`),
 
-  submitPicks: (userName, picks) =>
-    request('/picks', { method: 'POST', body: JSON.stringify({ userName, picks }) }),
+  submitPicks: (userName, weekId, picks) =>
+    request('/picks', { method: 'POST', body: JSON.stringify({ userName, weekId, picks }) }),
 
   getPicks: (weekId, userName) =>
     request(`/picks/${encodeURIComponent(weekId)}/${encodeURIComponent(userName)}`),

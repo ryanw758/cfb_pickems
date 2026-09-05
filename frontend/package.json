@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "homepage": "https://ryanw758.github.io/cfb-pickems",
+  "homepage": "https://ryanw758.github.io/cfb_pickems",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

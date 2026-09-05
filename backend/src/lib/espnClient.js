@@ -37,6 +37,16 @@ async function fetchSpreadForEvent(eventId) {
   return pick.spread;
 }
 
+function parseTeamRank(competitor) {
+  const rawRank = competitor.rank ?? competitor.curatedRank?.current ?? competitor.team?.rank;
+  const rank = Number(rawRank);
+  return Number.isInteger(rank) && rank >= 1 && rank <= 25 ? rank : null;
+}
+
+function parseTeamColor(color) {
+  return typeof color === 'string' && /^[0-9a-f]{6}$/i.test(color) ? `#${color}` : null;
+}
+
 /** Normalizes a raw ESPN scoreboard event into the shape we store. */
 function parseEvent(event) {
   const competition = event.competitions && event.competitions[0];
@@ -52,17 +62,23 @@ function parseEvent(event) {
     gameId: event.id,
     startTime: event.date,
     shortName: event.shortName, // e.g. "TEX @ OU"
+    venue: competition.venue?.fullName || null,
+    neutralSite: Boolean(competition.neutralSite),
     homeTeam: {
       id: home.team.id,
       name: home.team.displayName,
       abbreviation: home.team.abbreviation,
       logo: home.team.logo,
+      rank: parseTeamRank(home),
+      color: parseTeamColor(home.team.color),
     },
     awayTeam: {
       id: away.team.id,
       name: away.team.displayName,
       abbreviation: away.team.abbreviation,
       logo: away.team.logo,
+      rank: parseTeamRank(away),
+      color: parseTeamColor(away.team.color),
     },
     // Positive spread favors home team is ESPN convention-dependent; we
     // just store the magnitude for "closeness" and the human-readable
@@ -70,6 +86,10 @@ function parseEvent(event) {
     spread: inlineOdds && typeof inlineOdds.spread === 'number' ? inlineOdds.spread : null,
     spreadDetails: inlineOdds ? inlineOdds.details : null,
     status: competition.status.type.name, // e.g. STATUS_SCHEDULED, STATUS_FINAL
+    statusState: competition.status.type.state,
+    statusDetail: competition.status.type.shortDetail || competition.status.type.detail,
+    period: Number.isInteger(competition.status.period) ? competition.status.period : null,
+    displayClock: competition.status.displayClock || null,
     completed: Boolean(competition.status.type.completed),
     homeScore: home.score !== undefined ? Number(home.score) : null,
     awayScore: away.score !== undefined ? Number(away.score) : null,
@@ -78,8 +98,8 @@ function parseEvent(event) {
 
 /**
  * Fetches the full week's slate, normalizes it, and backfills any missing
- * spreads via the summary endpoint. Only games that have a usable spread
- * are returned, since spread is what we sort by.
+ * spreads via the summary endpoint. Games without a usable spread are still
+ * returned so callers can use them to fill the weekly game limit.
  */
 async function fetchWeekGamesWithSpreads({ start, end, groupId }) {
   const events = await fetchScoreboard({ start, end, groupId });
@@ -97,7 +117,24 @@ async function fetchWeekGamesWithSpreads({ start, end, groupId }) {
     })
   );
 
-  return withSpreads.filter((g) => g.spread !== null);
+  return withSpreads;
 }
 
-module.exports = { fetchScoreboard, fetchSpreadForEvent, parseEvent, fetchWeekGamesWithSpreads };
+function selectWeeklyGames(games, limit) {
+  return [...games]
+    .sort((a, b) => {
+      if (a.spread === null && b.spread !== null) return 1;
+      if (a.spread !== null && b.spread === null) return -1;
+      if (a.spread === null && b.spread === null) return 0;
+      return Math.abs(a.spread) - Math.abs(b.spread);
+    })
+    .slice(0, limit);
+}
+
+module.exports = {
+  fetchScoreboard,
+  fetchSpreadForEvent,
+  parseEvent,
+  fetchWeekGamesWithSpreads,
+  selectWeeklyGames,
+};

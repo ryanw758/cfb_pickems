@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Header from './components/Header.jsx';
 import Login from './pages/Login.jsx';
 import Picks from './pages/Picks.jsx';
@@ -13,10 +13,11 @@ function RequireUser({ children }) {
 
 export default function App() {
   const { user } = useUser();
+  const location = useLocation();
 
   return (
     <>
-      <Header />
+      {location.pathname !== '/login' && <Header />}
       <main className="app-shell">
         <Routes>
           <Route path="/login" element={user ? <Navigate to="/picks" replace /> : <Login />} />

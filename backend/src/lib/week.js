@@ -1,11 +1,10 @@
 /**
- * The pick'em "week" runs Monday -> Sunday. weekId is the ISO date
- * (YYYY-MM-DD) of that week's Monday, e.g. "2026-09-07".
+ * The pick'em "week" runs Wednesday -> Tuesday. weekId is the ISO date
+ * (YYYY-MM-DD) of that week's Wednesday, e.g. "2026-09-09".
  *
  * Season weeks are indexed from 0, starting on the configured SEASON_START_DATE.
- * For example, if the season starts on 2026-08-30, then:
- * - 2026-08-30 -> week index 0
- * - 2026-09-06 -> week index 1
+ * For example, if the season starts on 2026-08-30, then the first week
+ * starts on Wednesday 2026-08-26.
  */
 
 const SEASON_START_DATE = process.env.SEASON_START_DATE || '2026-08-30';
@@ -15,21 +14,21 @@ function toIsoDate(d) {
   return d.toISOString().slice(0, 10);
 }
 
-/** Monday at 00:00 UTC of the week containing `date` (defaults to now). */
-function mondayOf(date = new Date()) {
+/** Wednesday at 00:00 UTC of the week containing `date` (defaults to now). */
+function wednesdayOf(date = new Date()) {
   const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-  const day = d.getUTCDay(); // 0 = Sunday, 1 = Monday, ...
-  const diffToMonday = day === 0 ? -6 : 1 - day;
-  d.setUTCDate(d.getUTCDate() + diffToMonday);
+  const day = d.getUTCDay(); // 0 = Sunday, 3 = Wednesday, ...
+  const diffToWednesday = day >= 3 ? 3 - day : -4 - day;
+  d.setUTCDate(d.getUTCDate() + diffToWednesday);
   return d;
 }
 
 function getSeasonStartDate() {
-  return mondayOf(new Date(`${SEASON_START_DATE}T00:00:00Z`));
+  return wednesdayOf(new Date(`${SEASON_START_DATE}T00:00:00Z`));
 }
 
 function getSeasonStartWeek() {
-  return mondayOf(getSeasonStartDate());
+  return wednesdayOf(getSeasonStartDate());
 }
 
 function isSeasonStarted(date = new Date()) {
@@ -52,7 +51,7 @@ function clampWeekId(weekId) {
   if (requestedWeek.getTime() < seasonStartWeek.getTime()) {
     return toIsoDate(seasonStartWeek);
   }
-  return toIsoDate(mondayOf(requestedWeek));
+  return toIsoDate(wednesdayOf(requestedWeek));
 }
 
 function getCurrentWeekId(date = new Date()) {
@@ -62,7 +61,7 @@ function getCurrentWeekId(date = new Date()) {
 
   const seasonWeekIndex = getSeasonWeekIndex(date);
   const weekStart = new Date(getSeasonStartWeek().getTime() + seasonWeekIndex * 7 * MILLISECONDS_PER_DAY);
-  return toIsoDate(mondayOf(weekStart));
+  return toIsoDate(wednesdayOf(weekStart));
 }
 
 function isGameLocked(startTimeIso) {
@@ -72,19 +71,21 @@ function isGameLocked(startTimeIso) {
   return Date.now() >= startTime.getTime();
 }
 
-/** Returns { start, end } as YYYYMMDD strings for the ESPN scoreboard `dates` param. */
+/** Returns { start, end } as YYYYMMDD strings for the ESPN scoreboard `dates` param.
+ *  Extends through the following Tuesday to capture Monday night games.
+ */
 function getWeekEspnDateRange(weekId) {
-  const monday = new Date(`${weekId}T00:00:00Z`);
-  const sunday = new Date(monday);
-  sunday.setUTCDate(sunday.getUTCDate() + 6);
+  const wednesday = new Date(`${weekId}T00:00:00Z`);
+  const nextWednesday = new Date(wednesday);
+  nextWednesday.setUTCDate(nextWednesday.getUTCDate() + 7); // Through following Tuesday (inclusive)
 
   const fmt = (d) => d.toISOString().slice(0, 10).replace(/-/g, '');
-  return { start: fmt(monday), end: fmt(sunday) };
+  return { start: fmt(wednesday), end: fmt(nextWednesday) };
 }
 
 module.exports = {
   toIsoDate,
-  mondayOf,
+  wednesdayOf,
   getSeasonStartDate,
   isSeasonStarted,
   getSeasonWeekIndex,

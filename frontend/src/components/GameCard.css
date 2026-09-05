@@ -1,92 +1,214 @@
 .game-card {
-  background: var(--color-card);
-  border: 1px solid var(--color-field-line);
+  position: relative;
+  background-color: var(--color-card);
+  background-image: linear-gradient(165deg, color-mix(in srgb, var(--color-card) 90%, white) 0%, transparent 60%);
+  width: 100%;
+  max-width: 640px;
+  margin-inline: auto;
+  border: 3px solid #684829;
   border-radius: var(--radius);
   padding: 16px;
+  box-shadow: 0 4px 0 #52391f, 0 10px 18px rgba(67, 43, 17, 0.22);
 }
 
-.game-card.is-correct {
-  border-color: #2f7d4d;
-}
-
-.game-card.is-incorrect {
-  border-color: #7d3a2f;
-  opacity: 0.75;
-}
-
-.game-card.is-locked {
-  border-color: var(--color-field-line);
+.game-card.is-locked:not(.is-correct):not(.is-incorrect) {
+  border-color: var(--color-outline-neutral);
   opacity: 0.8;
 }
 
 .game-card__meta {
-  display: flex;
-  justify-content: space-between;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--color-chalk-dim);
-  margin-bottom: 12px;
+  margin: -16px -16px 12px;
+  padding: 12px 16px;
+  background: #3a2a1a;
+  border-radius: calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0 0;
+  font-family: var(--font-display);
+  color: #e8e0cd;
+  font-size: 20px;
+  text-shadow: 0 1px 0 #2a1409, 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+
+.game-card.is-correct .game-card__meta {
+  background: #2f7a49;
+}
+
+.game-card.is-incorrect .game-card__meta {
+  background: #a13a2a;
+}
+
+.game-card__date {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+
+.game-card__venue {
+  font-size: 22px;
+  font-weight: 400;
+  color: color-mix(in srgb, #e8e0cd 80%, transparent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .game-card__meta-right {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
-}
-
-.game-card__lock {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 7px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--color-chalk);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  min-width: 0;
 }
 
 .game-card__spread {
-  color: var(--color-amber);
+  color: #e8e0cd;
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.game-card__neutral {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border: 2px solid #52391f;
+  border-radius: 4px;
+  background: linear-gradient(165deg, var(--color-amber) 0%, var(--color-amber-dim) 100%);
+  color: #3b2412;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 2px 0 rgba(35, 23, 17, 0.45);
 }
 
 .game-card__matchup {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
   gap: 12px;
 }
 
-.game-card__at {
-  font-family: var(--font-mono);
+.game-card__team-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.game-card__team-label {
+  font-family: var(--font-body);
   color: var(--color-chalk-dim);
   font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .game-card__team {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+  height: 116px;
+  padding: 10px 8px;
+  background: linear-gradient(165deg, color-mix(in srgb, var(--team-color) 100%, white 18%) 0%, var(--team-color) 55%, color-mix(in srgb, var(--team-color) 100%, black 15%) 100%);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.12), 0 2px 0 rgba(35, 23, 17, 0.32);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s ease;
+  touch-action: manipulation;
+}
+
+.game-card .game-card__team.is-picked {
+  border-width: 2px;
+  border-color: #000;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.32);
+}
+
+.game-card .game-card__team.is-picked::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #f3e49a 0%, var(--color-amber) 55%, var(--color-amber-dim) 100%);
+  clip-path: polygon(100% 0, 38% 0, 100% 58%);
+  border-top-right-radius: var(--radius);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.game-card__team-ribbon {
+  position: absolute;
+  top: -13px;
+  right: -13px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 12px;
-  background: transparent;
-  border: 1.5px solid var(--color-field-line);
-  border-radius: var(--radius);
-  color: var(--color-chalk);
-  cursor: pointer;
-  text-align: left;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  justify-content: center;
+  background: #fff;
+  border: 2px solid var(--color-chalk);
+  border-radius: 50%;
+  box-shadow: 0 2px 0 var(--color-amber-dim), 0 2px 6px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  z-index: 2;
 }
 
-.game-card__team:hover:not(:disabled) {
-  border-color: var(--team-accent);
+.game-card__team-ribbon-icon {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  color: #3b2412;
 }
 
-.game-card__team.is-picked {
-  border-color: var(--team-accent);
-  background: color-mix(in srgb, var(--team-accent) 14%, transparent);
+.game-card__team-ribbon.is-correct .game-card__team-ribbon-icon {
+  color: #2f7a49;
+}
+
+.game-card__team-ribbon.is-incorrect .game-card__team-ribbon-icon {
+  color: #a13a2a;
+}
+
+/* Corner block (yellow triangle) color changes based on game state */
+.game-card.is-locked .game-card__team.is-picked::before {
+  background: linear-gradient(135deg, #9a9180 0%, #7c7261 55%, #5a5245 100%);
+}
+
+.game-card.is-correct .game-card__team.is-picked::before {
+  background: linear-gradient(135deg, #5fd6a0 0%, #2f7a49 55%, #1f5533 100%);
+}
+
+.game-card.is-incorrect .game-card__team.is-picked::before {
+  background: linear-gradient(135deg, #e09a8d 0%, #a13a2a 55%, #6f2630 100%);
+}
+
+.game-card__team.is-loser {
+  opacity: 0.5;
 }
 
 .game-card__team:disabled {
@@ -94,20 +216,160 @@
 }
 
 .game-card__logo {
-  width: 24px;
-  height: 24px;
+  width: 56px;
+  height: 56px;
+  padding: 6px;
   object-fit: contain;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .game-card__team-name {
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 20px;
+  font-weight: 700;
   letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-card__team-name-abbr {
+  display: none;
+}
+
+.game-card__rank {
+  font-size: 0.8em;
+  color: inherit;
+  font-weight: 400;
+  opacity: 1;
+  position: relative;
+  top: -0.3em;
+}
+
+.game-card__meta.is-live .game-card__date {
+  color: #ff6b4a;
 }
 
 .game-card__result {
   margin-top: 12px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--color-chalk-dim);
+  padding: 8px 12px;
+  border: 2px solid rgba(104, 72, 41, 0.65);
+  border-radius: var(--radius);
+  background: rgba(35, 23, 17, 0.35);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-chalk);
+}
+
+.game-card__result-score {
+  font-variant-numeric: tabular-nums;
+}
+
+/* In final states the scorebox outline matches the win/loss color; all
+   text colors stay unchanged. */
+.game-card__result.is-correct {
+  border-color: #2f7a49;
+}
+
+.game-card__result.is-incorrect {
+  border-color: #a13a2a;
+}
+
+/* Only the Correct/Missed verdict takes the green/red state color; the
+   footer box, scores, and labels stay identical for every state. */
+.game-card__result-verdict.is-correct {
+  color: #2f7a49;
+}
+
+.game-card__result-verdict.is-incorrect {
+  color: #a13a2a;
+}
+
+.game-card__pick-accuracy {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border: 1px solid color-mix(in srgb, #e8e0cd 45%, transparent);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e8e0cd;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .game-card {
+    padding: 10px;
+  }
+
+  .game-card__meta {
+    margin: -10px -10px 12px;
+    gap: 6px;
+    padding: 12px 12px;
+    font-size: 18px;
+  }
+
+  .game-card__matchup {
+    gap: 8px;
+  }
+
+  .game-card__team-row {
+    gap: 5px;
+  }
+
+  .game-card__team-label {
+    font-size: 12px;
+  }
+
+  .game-card__date {
+    font-size: 18px;
+  }
+
+  .game-card__spread {
+    font-size: 15px;
+  }
+
+  .game-card__team {
+    height: 96px;
+    padding: 8px 6px;
+  }
+
+  .game-card__logo {
+    width: 44px;
+    height: 44px;
+  }
+
+  .game-card__team-name {
+    font-size: 17px;
+  }
+
+  /* Show the abbreviated team name on small screens so it fits the
+     narrower horizontal team cards. */
+  .game-card__team-name-full {
+    display: none;
+  }
+
+  .game-card__team-name-abbr {
+    display: inline;
+  }
+
+  /* Keep the AP rank as a superscript prefix before the team abbreviation. */
+  .game-card__rank {
+    display: inline;
+    margin-right: 2px;
+  }
 }

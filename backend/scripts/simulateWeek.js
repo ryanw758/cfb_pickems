@@ -1,29 +1,75 @@
 #!/usr/bin/env node
-const { BatchWriteCommand, QueryCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+require('dotenv').config();
+
+const { BatchWriteCommand, QueryCommand, UpdateCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
 const { doc } = require('../src/lib/dynamo');
-const { fetchWeekGamesWithSpreads, fetchScoreboard, parseEvent } = require('../src/lib/espnClient');
+const { fetchWeekGamesWithSpreads, fetchScoreboard, parseEvent, selectWeeklyGames } = require('../src/lib/espnClient');
 const { getWeekEspnDateRange } = require('../src/lib/week');
 
 const GAMES_TABLE = process.env.GAMES_TABLE;
 const PICKS_TABLE = process.env.PICKS_TABLE;
+const USERS_TABLE = process.env.USERS_TABLE;
 const ESPN_GROUP_ID = process.env.ESPN_GROUP_ID || '80';
 const NUM_GAMES_PER_WEEK = Number(process.env.NUM_GAMES_PER_WEEK || 10);
+const FAVORITE_TEAM_SPREAD_THRESHOLD = 15;
+const MAX_BONUS_GAMES = 5;
+
+async function getFavoriteTeamIds() {
+  const ids = new Set();
+  let ExclusiveStartKey;
+  do {
+    const res = await doc.send(new ScanCommand({
+      TableName: USERS_TABLE,
+      ProjectionExpression: 'favoriteTeamId',
+      ExclusiveStartKey,
+    }));
+    for (const item of res.Items || []) {
+      if (item.favoriteTeamId) ids.add(String(item.favoriteTeamId));
+    }
+    ExclusiveStartKey = res.LastEvaluatedKey;
+  } while (ExclusiveStartKey);
+  return ids;
+}
 
 async function fetchWeek(weekId) {
   const { start, end } = getWeekEspnDateRange(weekId);
   console.log(`Fetching games for week ${weekId} (${start} -> ${end})`);
-  const games = await fetchWeekGamesWithSpreads({ start, end, groupId: ESPN_GROUP_ID });
+  const [games, favoriteTeamIds] = await Promise.all([
+    fetchWeekGamesWithSpreads({ start, end, groupId: ESPN_GROUP_ID }),
+    getFavoriteTeamIds(),
+  ]);
+
   if (!games || games.length === 0) {
     console.warn('No games returned from ESPN for that week');
     return { weekId, selected: 0 };
   }
 
-  const closest = [...games]
-    .sort((a, b) => Math.abs(a.spread) - Math.abs(b.spread))
-    .slice(0, NUM_GAMES_PER_WEEK);
+  const base = selectWeeklyGames(games, NUM_GAMES_PER_WEEK);
+  const baseIds = new Set(base.map((g) => g.gameId));
+
+  const bonusGames = favoriteTeamIds.size > 0
+    ? games
+        .filter((g) => {
+          if (baseIds.has(g.gameId)) return false;
+          const hasFav = favoriteTeamIds.has(g.homeTeam.id) || favoriteTeamIds.has(g.awayTeam.id);
+          const withinSpread = g.spread === null || Math.abs(g.spread) <= FAVORITE_TEAM_SPREAD_THRESHOLD;
+          return hasFav && withinSpread;
+        })
+        .sort((a, b) => {
+          if (a.spread === null && b.spread !== null) return 1;
+          if (a.spread !== null && b.spread === null) return -1;
+          if (a.spread === null && b.spread === null) return 0;
+          return Math.abs(a.spread) - Math.abs(b.spread);
+        })
+        .slice(0, MAX_BONUS_GAMES)
+    : [];
+
+  const selected = [...base, ...bonusGames];
+  console.log(`${base.length} base games + ${bonusGames.length} bonus games = ${selected.length} total`);
+  if (favoriteTeamIds.size > 0) console.log('Favorite team IDs:', [...favoriteTeamIds]);
 
   const chunks = [];
-  for (let i = 0; i < closest.length; i += 25) chunks.push(closest.slice(i, i + 25));
+  for (let i = 0; i < selected.length; i += 25) chunks.push(selected.slice(i, i + 25));
 
   for (const chunk of chunks) {
     await doc.send(
@@ -36,8 +82,8 @@ async function fetchWeek(weekId) {
       })
     );
   }
-  console.log(`Stored ${closest.length} games for week ${weekId}`);
-  return { weekId, selected: closest.length };
+  console.log(`Stored ${selected.length} games for week ${weekId}`);
+  return { weekId, selected: selected.length, bonus: bonusGames.length };
 }
 
 async function gradeWeek(weekId) {

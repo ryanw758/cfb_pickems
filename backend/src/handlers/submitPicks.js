@@ -10,6 +10,7 @@ const PICKS_TABLE = process.env.PICKS_TABLE;
  * POST /picks
  * {
  *   "userName": "Jordan",
+ *   "weekId": "2026-08-26",
  *   "picks": [
  *     { "gameId": "401628123", "pickedSide": "home" },
  *     ...
@@ -26,12 +27,11 @@ exports.handler = async (event) => {
   try {
     const body = JSON.parse(event.body || '{}');
     const userName = (body.userName || '').trim();
+    const weekId = body.weekId || getCurrentWeekId();
     const picks = Array.isArray(body.picks) ? body.picks : [];
 
     if (!userName) return badRequest('userName is required');
     if (picks.length === 0) return badRequest('picks must be a non-empty array');
-
-    const weekId = getCurrentWeekId();
 
     const { Items: weekGames = [] } = await doc.send(
       new QueryCommand({
@@ -41,6 +41,9 @@ exports.handler = async (event) => {
       })
     );
     const validGameIds = new Set(weekGames.map((g) => g.gameId));
+
+    const picksToSave = [];
+    const skippedGameIds = [];
 
     for (const pick of picks) {
       if (!validGameIds.has(pick.gameId)) {
@@ -52,8 +55,15 @@ exports.handler = async (event) => {
 
       const game = weekGames.find((item) => item.gameId === pick.gameId);
       if (game && isGameLocked(game.startTime)) {
-        return badRequest(`picks for game ${pick.gameId} are locked at kickoff`);
+        skippedGameIds.push(pick.gameId);
+        continue; // Skip locked/completed games instead of rejecting the whole batch
       }
+
+      picksToSave.push(pick);
+    }
+
+    if (picksToSave.length === 0) {
+      return ok({ weekId, userName, saved: 0, skipped: skippedGameIds.length });
     }
 
     const weekUser = `${weekId}#${userName}`;
@@ -61,7 +71,7 @@ exports.handler = async (event) => {
     await doc.send(
       new BatchWriteCommand({
         RequestItems: {
-          [PICKS_TABLE]: picks.map((pick) => ({
+          [PICKS_TABLE]: picksToSave.map((pick) => ({
             PutRequest: {
               Item: {
                 weekUser,
@@ -78,7 +88,7 @@ exports.handler = async (event) => {
       })
     );
 
-    return ok({ weekId, userName, saved: picks.length });
+    return ok({ weekId, userName, saved: picksToSave.length, skipped: skippedGameIds.length });
   } catch (err) {
     return serverError(err);
   }
