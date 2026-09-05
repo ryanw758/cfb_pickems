@@ -23,8 +23,8 @@ for deploy instructions. It provisions:
 
 - **DynamoDB tables**: `Users`, `Games`, `Picks`
 - **Lambda functions**: login, list games, submit picks, get picks, leaderboard,
-  plus two scheduled jobs (`fetchWeeklyGames`, `gradeWeek`)
-- **EventBridge rules**: Monday morning fetch, Sunday night grading
+  plus a scheduled job (`fetchWeeklyGames`)
+- **EventBridge rules**: Tuesday evening fetch
 - **API Gateway HTTP API**: exposes the Lambdas to the frontend
 
 ## Frontend (React)
