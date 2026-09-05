@@ -2,17 +2,11 @@
 
 A skeleton project for a college football pick'em app.
 
-- Every **Monday**, a scheduled job pulls the week's CFB games from the ESPN API,
-  finds the 10 games with the closest point spreads, and stores them.
-- Users log in with just their **name** (no password — built for a friend group).
-- Each user picks a winner for all 10 games.
-- Every **Sunday night**, a scheduled job pulls final scores from ESPN, grades
-  everyone's picks, and updates the leaderboard.
-
-This is a **skeleton** — the plumbing is wired up end-to-end, but a lot of the
-logic is intentionally left simple (marked `// TODO`) for you to flesh out
-once you share your spreadsheet's scoring rules (confidence points? straight
-up? tiebreakers?).
+- Every **Tuesday**, a scheduled job pulls the week's CFB games from the ESPN API,
+  and selects games for a pick'em pool.
+- Users log in with a username and password
+- Each user picks a winner for all games.
+- Scores are updated in (psuedo) real time and displayed on the standings page.
 
 ## Structure
 
@@ -37,3 +31,4 @@ for deploy instructions. It provisions:
 
 A Vite + React app with three screens: Login, Picks (this week's 10 games),
 and Leaderboard. See [`frontend/README.md`](frontend/README.md).
+The Rules button displays a popup modal with the rules set by the commissioner.
